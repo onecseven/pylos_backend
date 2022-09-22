@@ -6,6 +6,9 @@ let isToken = (x) => {
 let create_coords = (x, y, z) => {
     return { x, y, z };
 };
+let coord_equality_check = (a, b) => {
+    return a.x === b.x && a.y === b.y && a.z === b.z;
+};
 let get_supports = (orig) => {
     let results = [];
     let { x, y, z } = orig;
@@ -90,22 +93,24 @@ let tile_from_coords = (state, coords) => {
 };
 let is_ball_free = (state, origin) => {
     let potential_blockers = get_potential_blockers(origin);
-    potential_blockers.forEach((tile) => {
+    for (let tile of potential_blockers) {
         let token = tile_from_coords(state, tile);
         if (token.type === "BALL") {
             return false;
         }
-    });
+    }
     return true;
 };
-let check_supports = (state, destination) => {
+let check_supports = (state, destination, origin) => {
     if (destination.z > 0) {
         let underboard = state.zones[destination.z - 1].grid;
-        let supports = get_supports(destination);
+        let supports = get_supports(destination).filter((coord) => {
+            return !coord_equality_check(coord, origin);
+        });
         let supports_are_present = supports.every((coord) => {
             return underboard.get_tile(coord.x, coord.y).type === "BALL";
         });
-        return supports_are_present;
+        return supports_are_present && supports.length === 4;
     }
     else if (destination.z === 0) {
         return true;
@@ -135,10 +140,11 @@ let check_cubes = (state, placed_ball) => {
     let ball = tile_from_coords(state, placed_ball);
     for (const key in cubes) {
         let cube = cubes[key];
-        let all_balls = cube.length === 4 && cube.every((coords) => {
-            let tile = tile_from_coords(state, coords);
-            return tile.type === "BALL" && tile.owner === ball.owner;
-        });
+        let all_balls = cube.length === 4 &&
+            cube.every((coords) => {
+                let tile = tile_from_coords(state, coords);
+                return tile.type === "BALL" && tile.owner === ball.owner;
+            });
         if (all_balls) {
             return true;
         }
@@ -158,5 +164,5 @@ exports.default = {
     check_lines,
     check_cubes,
     check_recover_bonus,
-    tile_from_coords
+    tile_from_coords,
 };
