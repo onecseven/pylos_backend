@@ -12,7 +12,7 @@ let exec_PLACE = (move, state) => {
     let { x, y, z } = move.payload.destination;
     let { grid } = state.zones[z];
     let player_has_balls = state.players[move.player].BALLS.length > 0;
-    let legal_destination = helpers_js_1.default.check_supports(state, { x, y, z });
+    let legal_destination = helpers_js_1.default.check_supports(state, { x, y, z }, { x, y, z });
     let tile = grid.get_tile(x, y);
     let dest_tile_is_empty = tile.type === "EMPTY";
     if (dest_tile_is_empty && player_has_balls && legal_destination) {
@@ -35,12 +35,14 @@ let exec_RAISE = (move, state) => {
     let { origin, destination } = move.payload;
     let upper_grid = state.zones[destination.z].grid;
     let lower_grid = state.zones[origin.z].grid;
-    let legal_destination = helpers_js_1.default.check_supports(state, destination);
+    let legal_destination = helpers_js_1.default.check_supports(state, destination, origin);
     let dest_tile_is_empty = upper_grid.get_tile(destination.x, destination.y).type === "EMPTY";
     let ball_exists = lower_grid.get_tile(origin.x, origin.y).type === "BALL";
     let ball_is_free = ball_exists && helpers_js_1.default.is_ball_free(state, origin);
     let player_owns_ball = move.player === lower_grid.get_tile(origin.x, origin.y).owner;
+    let dest_tile_is_above = destination.z === origin.z + 1 || destination.z === origin.z + 2;
     if (dest_tile_is_empty &&
+        dest_tile_is_above &&
         legal_destination &&
         ball_exists &&
         ball_is_free &&
@@ -59,6 +61,7 @@ let exec_RAISE = (move, state) => {
             ball_exists,
             player_owns_ball,
             ball_is_free,
+            dest_tile_is_above,
         };
         (_a = state.global) === null || _a === void 0 ? void 0 : _a.funcs.on_move_failed(checks, move);
     }
@@ -75,10 +78,14 @@ let exec_RECOVER = (move, state) => {
     let recovery_on_allowed_levels = origins.every((coords) => {
         return coords.z < 2;
     });
+    let balls_are_free = origins.every((coord) => {
+        return helpers_js_1.default.is_ball_free(state, coord);
+    });
     if (recover_bonus &&
         player_owns_balls &&
         recovery_within_bounds &&
-        recovery_on_allowed_levels) {
+        recovery_on_allowed_levels &&
+        balls_are_free) {
         origins.forEach(({ x, y, z }) => {
             let { grid } = state.zones[z];
             let temp = grid.get_tile(x, y);
@@ -87,7 +94,13 @@ let exec_RECOVER = (move, state) => {
         });
     }
     else {
-        (_a = state.global) === null || _a === void 0 ? void 0 : _a.funcs.on_move_failed({ recover_bonus, player_owns_balls, recovery_within_bounds }, move, false);
+        (_a = state.global) === null || _a === void 0 ? void 0 : _a.funcs.on_move_failed({
+            recover_bonus,
+            player_owns_balls,
+            recovery_within_bounds,
+            recovery_on_allowed_levels,
+            balls_are_free,
+        }, move, false);
     }
     return state;
 };
