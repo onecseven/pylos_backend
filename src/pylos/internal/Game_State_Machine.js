@@ -4,6 +4,11 @@ exports.GSM = void 0;
 const phase_tracker_js_1 = require("./phase_tracker.js");
 const add_position_js_1 = require("./utils/add_position.js");
 const bus_js_1 = require("./utils/bus.js");
+var game_status;
+(function (game_status) {
+    game_status["RUNNING"] = "RUNNING";
+    game_status["FINISHED"] = "FINISHED";
+})(game_status || (game_status = {}));
 class GSM {
     constructor(blueprint) {
         this.state = blueprint;
@@ -42,6 +47,9 @@ class GSM {
         }
         else {
             this.phase_tracker.advance_phase();
+            if (this.state.players[this.current_player].BALLS.length === 0) {
+                this.phase_tracker.advance_phase();
+            }
         }
     }
     get current_phase() {
@@ -57,9 +65,9 @@ class GSM {
             phases: this.state.phases,
             move_history: this.state.global.move_history,
             errors: this.state.global.errors,
-            flags: this.state.global.flags,
             current_turn: this.current_turn,
             current_player: this.current_player,
+            game_status: this.game_status,
         };
     }
     static decorator(pre_state, wincon_check) {
