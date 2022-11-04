@@ -8,7 +8,6 @@ const messages = require("./messages")
 
 class RoomsManager {
   rooms = {}
-
   handleMessage(data, sender) {
     switch (data.message) {
       case "create room":
