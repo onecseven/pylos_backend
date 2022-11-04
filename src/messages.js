@@ -1,8 +1,3 @@
-/**
- * Copyright 2020 Anicet Nougaret & contributors
- * See LICENCE.txt
- */
-
 module.exports = {
   YOUR_ID: (id, name) => ({ message: "Your id", id: id, name: name }),
   JOINED_ROOM: (roomId, usersND, host) => ({
