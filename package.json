@@ -1,10 +1,9 @@
 {
-  "name": "gameroom-backend",
+  "name": "pylos-backend",
   "version": "0.0.1",
-  "description": "game server for zugzwang",
+  "description": "socket server for pylos gaming",
   "main": "src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node src/index.js"
   },
   "author": "github.com/onecseven",
@@ -12,6 +11,8 @@
   "dependencies": {
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
+    "express-async-errors": "^3.1.1",
+    "node-persist": "^3.1.0",
     "uuid": "^8.3.1",
     "ws": "^7.3.1"
   },

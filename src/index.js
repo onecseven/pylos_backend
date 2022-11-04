@@ -1,16 +1,7 @@
-/**
- * Copyright 2020 Anicet Nougaret & contributors
- * See LICENCE.txt
- */
-
-// Importing .env file
-require('dotenv').config()
-
 // External libraries
 const express = require('express');
 const http = require('http');
 const WebSocket = require('ws');
-const port = process.env.PORT;
 const server = http.createServer(express);
 const wss = new WebSocket.Server({ server });
 
@@ -18,15 +9,12 @@ const wss = new WebSocket.Server({ server });
 const RoomsManager = require('./RoomsManager')
 const UsersManager = require('./UsersManager')
 
-// Handling a connection
 wss.on('connection', ws => {
-    // Creating a user instance for this connection
     ws.id = getUniqueID();
     let user = UsersManager.createUser(ws.id, ws, "User#" + ws.id.substring(0, 3))
 
     console.log(`user ${ws.id} connected`)
 
-    // Handling this connected user's messages
     ws.on('message', message => {
         let data = JSON.parse(message)
 
@@ -35,7 +23,6 @@ wss.on('connection', ws => {
         RoomsManager.handleMessage(data, user)
     })
 
-    // When it disconnects
     ws.on('close', (code, reason) => {
         UsersManager.removeUser(ws.id)
 
@@ -45,9 +32,6 @@ wss.on('connection', ws => {
 
 })
 
-// Starting the server, uncomment 0.0... to host publicly for
-// the entire world to see. (Assuming port is openned on your
-// machine's firewall, and on your router's firewall)
 server.listen(3001, /*'0.0.0.0',*/ function() {
     console.log(`Server is listening on ${3001}!`)
 })
