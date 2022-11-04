@@ -2,25 +2,24 @@
 const express = require('express');
 const http = require('http');
 const WebSocket = require('ws');
+const { getUniqueID } = require("./functions/helpers/getUniqueID");
+const create_user = require("./functions/user/create_user")
 const server = http.createServer(express);
 const wss = new WebSocket.Server({ server });
 
 // Internal libraries
-const RoomsManager = require('./RoomsManager')
-const UsersManager = require('./UsersManager')
+const router = require('./MessageRouter')
 
 wss.on('connection', ws => {
     ws.id = getUniqueID();
-    let user = UsersManager.createUser(ws.id, ws, "User#" + ws.id.substring(0, 3))
+    let user = create_user(ws.id, ws, "User#" + ws.id.substring(0, 3))
 
     console.log(`user ${ws.id} connected`)
 
     ws.on('message', message => {
         let data = JSON.parse(message)
-
         console.log("Receiving from "+user.id+"|"+user.name+": "+message)
-        UsersManager.handleMessage(data, user)
-        RoomsManager.handleMessage(data, user)
+        router(data, user)
     })
 
     ws.on('close', (code, reason) => {
@@ -36,9 +35,3 @@ server.listen(3001, /*'0.0.0.0',*/ function() {
     console.log(`Server is listening on ${3001}!`)
 })
 
-function getUniqueID () {
-    function s4() {
-        return Math.floor((1 + Math.random()) * 0x10000).toString(16).substring(1)
-    }
-    return s4() + s4() + '-' + s4()
-}
