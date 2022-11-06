@@ -3,7 +3,9 @@ const express = require('express');
 const http = require('http');
 const WebSocket = require('ws');
 const { getUniqueID } = require("./functions/helpers/getUniqueID");
-const create_user = require("./functions/user/create_user")
+const users = require("./data/users")
+const register_user = require("./functions/user/register_user")
+const user_disconnected = require("./functions/user/user_disconnected")
 const server = http.createServer(express);
 const wss = new WebSocket.Server({ server });
 
@@ -12,18 +14,18 @@ const router = require('./MessageRouter')
 
 wss.on('connection', ws => {
     ws.id = getUniqueID();
-    let user = create_user(ws.id, ws, "User#" + ws.id.substring(0, 3))
-
+    let user = users.create(ws.id, "User#" + ws.id.substring(0, 3))
+    register_user(user, ws)
     console.log(`user ${ws.id} connected`)
 
-    ws.on('message', message => {
+    ws.on('message', async message => {
         let data = JSON.parse(message)
         console.log("Receiving from "+user.id+"|"+user.name+": "+message)
-        router(data, user)
+        await router(user, data)
     })
 
     ws.on('close', (code, reason) => {
-        UsersManager.removeUser(ws.id)
+        user_disconnected(ws.id)
 
         reason = (reason != "" ? 'reason: '+reason : 'unknown reason')
         console.log(`user ${ws.id} disconnected for ${reason} with code: ${code}`)
