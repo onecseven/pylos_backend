@@ -5,8 +5,9 @@ const leave_room = require("./room/leave_room")
 const start_pylos = require("./games/start_pylos")
 const process_move = require("./games/process_move")
 const user_wants_rematch = require("./room/user_wants_rematch")
-const create_user = require("./user/create_user")
-const remove_user = require("./user/remove_user")
+// const create_user = require("./user/create_user")
+const remove_user = require("./user/user_disconnected")
+const login = require("./user/login")
 
 module.exports = {
   room: {
@@ -17,8 +18,9 @@ module.exports = {
   },
   user: {
     name_change,
-    create_user,
-    remove_user
+    // create_user,
+    remove_user,
+    login
   },
   game: {
     start_pylos,
