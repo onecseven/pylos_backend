@@ -1,18 +1,37 @@
-const rooms = require("../../data/rooms")
-const Room = require("../../data/Room")
-const messages = require("../../messages")
+const { rooms } = require("../../data/rooms")
+const messages = require("../messages")
+const send_data = require("../switchboard/send_to_user")
+const send_to_room = require("../switchboard/send_to_everyone")
+
+let full_room = (id) => send_data(messages.FAILED_TO_JOIN_ROOM("room is full"), id)
+let room_started = (id) => send_data(messages.FAILED_TO_JOIN_ROOM("room is in game"), id)
+let already_in = (id) => send_data(messages.FAILED_TO_JOIN_ROOM("already inside this room"), id)
+let wrong_code = (id) => send_data(messages.FAILED_TO_JOIN_ROOM("wrong code"), id)
+let you_joined = (room, user) => send_data(
+  messages.JOINED_ROOM(
+    room.id,
+    room.users.map((user) => user.serialize()),
+    room.getHost().id
+  ),
+  user.id
+)
+let someone_joined = (room, user) => send_to_room(messages.USER_JOINED(room.id, user.serialize()), room.id)
+
 
 const join_room = (user, data) => {
   let { roomId } = data
-  if (rooms.hasOwnProperty(roomId)) {
-    let room = rooms[roomId]
-    if (room.maxUsers > room.users.length && !room.started && room.users.indexOf(user) == -1) room.join(user)
-    else if (room.users.length >= room.maxUsers) user.sendData(messages.FAILED_TO_JOIN_ROOM("room is full"))
-    else if (room.started) user.sendData(messages.FAILED_TO_JOIN_ROOM("room is in game"))
-    else if (room.users.indexOf(user) != -1) user.sendData(messages.FAILED_TO_JOIN_ROOM("already inside this room"))
-  } else {
-    user.sendData(messages.FAILED_TO_JOIN_ROOM("wrong code"))
-  }
+  let room = rooms.get(roomId)
+  if (room) {
+    if (room.join(user)) {
+      user.has_joined_room(room.id)
+      you_joined(room, user)
+      someone_joined(room, user)
+    } 
+    else if (room.users.length >= room.maxUsers) full_room(user.id)
+    else if (room.game) room_started(user.id)
+    else if (room.users.indexOf(user) != -1) already_in(user.id)
+  } 
+  else wrong_code(user.id)
 }
 
 module.exports = join_room

@@ -1,29 +1,34 @@
 const rooms = require("../../data/rooms")
 const { create_pylos_game } = require("./pylos/clones/pylos/blueprint")
-const messages = require("../../messages")
+const messages = require("../messages")
+const send_data = require("../switchboard/send_to_user")
+const send_to_room = require("../switchboard/send_to_everyone")
+
+const not_enough = (user) =>
+  send_data(messages.GAME_START_FAIL("not enough players"), user.id)
+const game_started = (id) => send_to_room(messages.GAME_STARTED(id), id)
+const send_turn = (user, turn_id) =>
+  send_data(messages.GIVE_TURN_ORDER(turn_id), user.id)
+const distribute_state = (state, roomId) => send_data_to_everyone(messages.GAME_STATE(state), roomId)
 
 const start_pylos = (user, data) => {
   let id = data.gameId
-
-  if (!rooms.HasOwnProperty(id)){
+  let room = rooms.get(id)
+  if (room) {
     console.error("Trying to start pylos on an inexistent room.")
     return
   }
 
-  if (rooms[id].users.length !== 2) {
-    user.sendData(messages.GAME_START_FAIL("not enough players"))
+  if (room.users.length !== 2) {
+    not_enough(user)
     return
   }
 
-  if (rooms[id].isHost(user)) {
-    let room = rooms[id]
-    room.started = true
-    room.sendDataToEveryone(messages.GAME_STARTED(id))
-    room.users.forEach((user, i) => {
-      user.sendData(messages.GIVE_TURN_ORDER(i))
-    })
+  if (room.isHost(user)) {
+    game_started(room.id)
+    room.users.forEach((user, i) => send_turn(user, i))
     room.game = create_pylos_game()
-    room.sendDataToEveryone(messages.GAME_STATE(room.game.game.serial_state))
+    distribute_state(room.game.serial_state, id)
   }
 }
 
