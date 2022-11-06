@@ -8,13 +8,17 @@ let cases = {
   "start pylos game": game.start_pylos,
   "pylos move": game.process_move,
   "user wants rematch": room.user_wants_rematch,
+  "login": user.login,
+// "rejoin"
+// "login" => (id) =>
+
   // "send host": null,
 }
 
-const router = (user, data) => {
+const router = async (user, data) => {
   let { message } = data
   if (cases.hasOwnProperty(message)) {
-    cases[message](user, data)
+    await cases[message](user, data)
   }
 }
 
