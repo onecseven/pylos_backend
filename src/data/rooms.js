@@ -11,9 +11,9 @@ class Room {
 
   join(user) {
     if (
-      this.maxUsers > room.users.length &&
-      !room.started &&
-      room.users.indexOf(user) == -1
+      this.maxUsers > this.users.length &&
+      this.game === null &&
+      this.users.includes(user) === false
     ) {
       this.users.push(user)
       return true
@@ -65,7 +65,7 @@ class Rooms {
 
   create() {
     let room = new Room()
-    this.rooms.add(room)
+    this.add(room)
     return room
   }
 
