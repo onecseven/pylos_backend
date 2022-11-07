@@ -7,22 +7,15 @@ let full_room = (id) => send_data(messages.FAILED_TO_JOIN_ROOM("room is full"), 
 let room_started = (id) => send_data(messages.FAILED_TO_JOIN_ROOM("room is in game"), id)
 let already_in = (id) => send_data(messages.FAILED_TO_JOIN_ROOM("already inside this room"), id)
 let wrong_code = (id) => send_data(messages.FAILED_TO_JOIN_ROOM("wrong code"), id)
-let you_joined = (room, user) => send_data(
-  messages.JOINED_ROOM(
-    room.id,
-    room.users.map((user) => user.serialize()),
-    room.getHost().id
-  ),
-  user.id
-)
+let you_joined = (room, user) => send_data(messages.JOINED_ROOM(room.id, room.users.map((user) => user.serialize()), room.getHost().id), user)
 let someone_joined = (room, user) => send_to_room(messages.USER_JOINED(room.id, user.serialize()), room.id)
-
 
 const join_room = (user, data) => {
   let { roomId } = data
   let room = rooms.get(roomId)
   if (room) {
-    if (room.join(user)) {
+    let user_has_joined = room.join(user)
+    if (user_has_joined) {
       user.has_joined_room(room.id)
       you_joined(room, user)
       someone_joined(room, user)
