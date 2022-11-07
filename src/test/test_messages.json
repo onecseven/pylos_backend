@@ -1,0 +1,11 @@
+{"message": "login","id": "fa3d4189-b407"}
+{"message": "my name is","name": "tati"}
+
+{"message": "create room"}
+{"message": "join room", "roomId": "stethe"}
+
+{"message": "leave room", "gameId": "stethe"}
+{"message": "start pylos game", "gameId": "stethe"}
+{"message": "pylos move", "gameId": "stethe", "move": {"player": "integer", "type": "PLACE", "payload": {},}}
+{"message": "user wants rematch", "gameId": "stethe"}
+{"message": "rejoin", "gameId": "stethe"}

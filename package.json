@@ -4,7 +4,8 @@
   "description": "socket server for pylos gaming",
   "main": "src/index.js",
   "scripts": {
-    "start": "node src/index.js"
+    "start": "node src/index.js",
+    "watch": "npx nodemon src/index.js"
   },
   "author": "github.com/onecseven",
   "license": "ISC",
