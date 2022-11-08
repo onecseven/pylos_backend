@@ -12,9 +12,10 @@ const login = async (user, data) => {
   
   let new_user = users.get(actual_id)
   
-  Object.assign(user,new_user )
+  Object.assign(user,new_user)
   
   switchboard.add(actual_id, connection)
+  
   send_data(messages.YOUR_ID(user.id, users.get(user.id).name), user.id)
 }
 

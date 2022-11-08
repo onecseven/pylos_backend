@@ -9,12 +9,12 @@ const user_wants_rematch = (user, data) => {
   let id = data.gameId
   let room = rooms.get(id)
 
-  if (room && room.hasUser(user)) {
-    user.rematch = true
+  if (room && room.hasUser(user.id)) {
+    room.wants_rematch(user.id)
   }
 
   if (room.users.every((user) => user.rematch === true)) {
-    room.users.every(user => user.rematch = false)
+    room.users.clear_rematch()
     start_pylos(room.users[0], data)
   } else {
     rematched(user, id)
