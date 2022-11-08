@@ -42,4 +42,8 @@ module.exports = {
     message: "rematch offered",
     from: rematcher.id,
   }),
+  YOUR_ROOMS: (rooms) => ({
+    message: "your rooms",
+    rooms
+  })
 }
