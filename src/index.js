@@ -20,12 +20,12 @@ wss.on('connection', ws => {
 
     ws.on('message', async message => {
         let data = JSON.parse(message)
-        console.log("Receiving from "+user.id+"|"+user.name+": "+message)
+        console.log("Receiving from "+user.id+"|"+user.name+": "+ message + " ")
         await router(user, data)
     })
 
-    ws.on('close', (code, reason) => {
-        user_disconnected(ws.id)
+    ws.on('close', async (code, reason) => {
+        await user_disconnected(user, code)
 
         reason = (reason != "" ? 'reason: '+reason : 'unknown reason')
         console.log(`user ${ws.id} disconnected for ${reason} with code: ${code}`)

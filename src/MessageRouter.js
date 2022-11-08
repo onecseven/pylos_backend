@@ -8,7 +8,9 @@ let cases = {
   "start pylos game": game.start_pylos,
   "pylos move": game.process_move,
   "user wants rematch": room.user_wants_rematch,
+  "my rooms": user.get_rooms,
   "login": user.login,
+  "rejoin": room.rejoin
 // "rejoin"
 // "login" => (id) =>
 
