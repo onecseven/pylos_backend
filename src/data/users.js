@@ -15,8 +15,15 @@ class User {
     serialize() {
         return {
             name: this.name,
-            id: this.id
+            id: this.id,
+            rooms: this.rooms,
         }
+    }
+
+    static deserialize(serializedUser) {
+      let temp = new User(serializedUser.id, serializedUser.name)
+      temp.rooms = serializedUser.rooms
+      return temp
     }
 
     has_joined_room(id){
@@ -24,7 +31,7 @@ class User {
     }
     
     left_room(id) {
-      this.rooms.splice(this.rooms.indexOf(id), 1)
+      this.rooms = this.rooms.filter(iid => id === id)
     }
 }
 
@@ -52,18 +59,19 @@ class Users {
   }
 
   async log_out(id) {
-    await storage.setItem(id, this.users.get(id))
+    await storage.setItem(id, this.users.get(id).serialize())
     this.users.delete(id)
   }
 
   async log_in(actual_id, old_id) {
     let keys = await storage.keys()
     if (keys.includes(actual_id)) {
-      let user = await storage.getItem(actual_id)
+      let temp_user = await storage.getItem(actual_id)
+      let user = User.deserialize(temp_user)
       this.add(user)
       this.remove(old_id)
     } else {
-      let temp_user = this.get(actual_id)
+      let temp_user = this.get(old_id)
       this.create(actual_id, temp_user.name)
       this.remove(old_id)
     }

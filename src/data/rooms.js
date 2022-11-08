@@ -1,6 +1,8 @@
 const englishWordGen = require("../functions/helpers/wordGen")
-const storage = require("./storage").init()
+const storage = require("./storage")
 const deserialize_move_list = require("../functions/games/deserialize_move_list")
+
+storage.init()
 class Room {
   id = englishWordGen()[0]
   users = []
@@ -10,24 +12,52 @@ class Room {
   constructor() {}
 
   join(user) {
-    if (
-      this.maxUsers > this.users.length &&
-      this.game === null &&
-      this.users.includes(user) === false
-    ) {
-      this.users.push(user)
+    if (this.users.map((u) => u.id).includes(user.id)) {
+      this.connected(user.id)
       return true
-    } else {
-      return false
+    } 
+    if (this.maxUsers > this.users.length && this.game === null) {
+      this.users.push({
+        id: user.id,
+        name: user.name,
+        rematch: false,
+        connected: true,
+      })
+      return true
     }
+    return false
   }
 
-  isHost(user) {
-    return this.users.indexOf(user) == 0
+  wants_rematch(id) {
+    this.users.find(user => user.id === id).rematch === true
   }
 
-  hasUser(user) {
-    return this.users.indexOf(user) !== -1
+  clear_rematch() {
+    this.users.forEach(user => {
+      user.rematch = false
+    })
+  }
+
+  exit(userid) {
+    this.users = this.users.filter((user) => user.id !== userid)
+  }
+
+  disconnected(userid) {
+    let user = this.users.find((user) => user.id === userid)
+    user.connected = false
+  }
+
+  connected(userid) {
+    let user = this.users.find((user) => user.id === userid)
+    user.connected = true
+  }
+
+  isHost(userid) {
+    return this.users[0].id === userid
+  }
+
+  hasUser(userid) {
+    return this.users.map((user) => user.id).includes(userid)
   }
 
   getHost() {
@@ -37,7 +67,7 @@ class Room {
   serialize() {
     return {
       id: this.id,
-      users: this.users.map((user) => user.serialize()),
+      users: this.users,
       maxUsers: this.maxUsers,
       game: this.game ? this.game.serial_state.move_history : null,
     }
@@ -45,7 +75,7 @@ class Room {
 
   static deserialize(serializedRoom) {
     let temp = new Room()
-    
+
     if (serializedRoom.game) {
       let temp_game = deserialize_move_list(serializedRoom.game)
       serializedRoom.game = temp_game
@@ -71,6 +101,31 @@ class Rooms {
 
   add(room) {
     this.rooms.set(room.id, room)
+  }
+
+  remove(room) {
+    this.rooms.delete(room.id)
+  }
+
+  async stored_lookup(roomid) {
+    let keys = await storage.keys()
+    if (keys.includes(roomid)){
+      return await this.rehydrate(roomid)
+    } else {
+      return null
+    }
+  }
+
+  async dehydrate(room) {
+    await storage.setItem(room.id, room.serialize())
+    this.remove(room)
+  }
+
+  async rehydrate(roomid) {
+    let temp = await storage.getItem(roomid)
+    let room = Room.deserialize(temp)
+    this.add(room)
+    return room
   }
 }
 
