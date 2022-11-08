@@ -5,6 +5,7 @@ const send_to_room = require("../switchboard/send_to_everyone")
 const leave_room = (user, data) => {
   let id = data.roomId
   let room = rooms.get(id)
+  
   if (!room) {
     console.error("No such room")
     return
@@ -15,8 +16,9 @@ const leave_room = (user, data) => {
   }
 
   if (!room.game) {
-    room.exit(user)
     send_to_room(messages.USER_LEFT(id, user.id), room.id)
+    room.exit(user.id)
+    if (room.users.length === 0) rooms.remove(room)
     //delete rooms[id]
     //delete from persist
   } else if (room.game) {
