@@ -1,6 +1,5 @@
 const storage = require("./storage")
 
-storage.init()
 class User {
     id = ""
     name = ""
@@ -28,6 +27,7 @@ class User {
 
     has_joined_room(id){
       this.rooms.push(id)
+      this.rooms = [...new Set(this.rooms)]
     }
     
     left_room(id) {
@@ -72,7 +72,7 @@ class Users {
       this.remove(old_id)
     } else {
       let temp_user = this.get(old_id)
-      this.create(actual_id, temp_user.name)
+      let user = this.create(actual_id, temp_user.name)
       this.remove(old_id)
     }
   }

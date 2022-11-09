@@ -1,8 +1,6 @@
 const englishWordGen = require("../functions/helpers/wordGen")
 const storage = require("./storage")
 const deserialize_move_list = require("../functions/games/deserialize_move_list")
-
-storage.init()
 class Room {
   id = englishWordGen()[0]
   users = []
@@ -69,13 +67,12 @@ class Room {
       id: this.id,
       users: this.users,
       maxUsers: this.maxUsers,
-      game: this.game ? this.game.serial_state.move_history : null,
+      game: this.game?.serial_state?.move_history
     }
   }
 
   static deserialize(serializedRoom) {
     let temp = new Room()
-
     if (serializedRoom.game) {
       let temp_game = deserialize_move_list(serializedRoom.game)
       serializedRoom.game = temp_game
@@ -117,11 +114,13 @@ class Rooms {
   }
 
   async dehydrate(room) {
+    console.log("Dehydrating room: " + room.id)
     await storage.setItem(room.id, room.serialize())
     this.remove(room)
   }
 
   async rehydrate(roomid) {
+    console.log("Rehydrating room: " + roomid)
     let temp = await storage.getItem(roomid)
     let room = Room.deserialize(temp)
     this.add(room)
