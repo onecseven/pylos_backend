@@ -1,3 +1,4 @@
+const { removeItem } = require("node-persist")
 const rooms = require("../../data/rooms")
 const messages = require("../messages")
 const send_to_room = require("../switchboard/send_to_everyone")
@@ -11,7 +12,7 @@ const leave_room = (user, data) => {
     return
   }
   
-  if (!room.users.includes(user)){
+  if (!room.hasUser(user.id)){
     console.error("Someone tried to leave a room they're not in")
   }
 
@@ -22,7 +23,7 @@ const leave_room = (user, data) => {
     //delete rooms[id]
     //delete from persist
   } else if (room.game) {
-    console.error("Game running")
+    room.disconnected(user.id)
     //TODO
     //PERSIST ROOM
   }
