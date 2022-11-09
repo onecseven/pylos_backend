@@ -2,6 +2,7 @@ const { rooms } = require("../../data/rooms")
 const messages = require("../messages")
 const send_data = require("../switchboard/send_to_user")
 const send_to_room = require("../switchboard/send_to_everyone")
+const rejoin = require("../room/rejoin")
 
 let full_room = (id) => send_data(messages.FAILED_TO_JOIN_ROOM("room is full"), id)
 let room_started = (id) => send_data(messages.FAILED_TO_JOIN_ROOM("room is in game"), id)
@@ -10,7 +11,7 @@ let wrong_code = (id) => send_data(messages.FAILED_TO_JOIN_ROOM("wrong code"), i
 let you_joined = (room, user) => send_data(messages.JOINED_ROOM(room.id, room.users, room.getHost().id), user.id)
 let someone_joined = (room, user) => send_to_room(messages.USER_JOINED(room.id, user.serialize()), room.id)
 
-const join_room = (user, data) => {
+const join_room = async (user, data) => {
   let { roomId } = data
   let room = rooms.get(roomId)
   if (room) {
@@ -20,8 +21,8 @@ const join_room = (user, data) => {
       you_joined(room, user)
       someone_joined(room, user)
     } 
+    else if (room && room.game && room.hasUser(user.id)) await rejoin(user, data)
     else if (room.users.length >= room.maxUsers) full_room(user.id)
-    else if (room.game) room_started(user.id)
   } 
   else wrong_code(user.id)
 }
