@@ -6,13 +6,21 @@ const send_data = require("../switchboard/send_to_user")
 const messages = require("../messages")
 
 // change this to switch board
-const get_rooms =  (user)  => {
+const get_rooms =  async (user)  => {
   if (user.rooms.length) {
-    let user_rooms = user.rooms
-    .map(id => rooms.get(id))
-    .filter(room => room !== null)
-    send_data(messages.YOUR_ROOMS(user_rooms), user.id)
-    return user_rooms 
+    let filtered = []
+    for (let id of user.rooms) {
+      let room = rooms.get(id)
+      if (!room) {
+        room = await rooms.stored_lookup(id)
+      }
+      if (room) {
+        filtered.push(room)
+      }
+    }
+    user.rooms = filtered.map(room => room.id)
+    send_data(messages.YOUR_ROOMS(filtered), user.id)
+    return user.rooms 
   }
 }   
 
