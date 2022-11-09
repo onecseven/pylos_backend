@@ -11,12 +11,11 @@ const login = async (user, data) => {
   await users.log_in(actual_id, old_id)
   
   let new_user = users.get(actual_id)
-  
   Object.assign(user,new_user)
   
   switchboard.add(actual_id, connection)
   
-  send_data(messages.YOUR_ID(user.id, users.get(user.id).name), user.id)
+  send_data(messages.YOUR_ID(actual_id, new_user.name), actual_id)
 }
 
 module.exports = login
