@@ -1,4 +1,3 @@
-const { user } = require("..")
 const switchboard = require("../../data/Switchboard")
 const users = require("../../data/users")
 const rooms = require("../../data/rooms")
@@ -21,6 +20,8 @@ const get_rooms =  async (user)  => {
     user.rooms = filtered.map(room => room.id)
     send_data(messages.YOUR_ROOMS(filtered), user.id)
     return user.rooms 
+  } else {
+    send_data(messages.YOUR_ROOMS([]), user.id)
   }
 }   
 

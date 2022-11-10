@@ -11,10 +11,6 @@ let cases = {
   "my rooms": user.get_rooms,
   "login": user.login,
   "rejoin": room.rejoin
-// "rejoin"
-// "login" => (id) =>
-
-  // "send host": null,
 }
 
 const router = async (user, data) => {
