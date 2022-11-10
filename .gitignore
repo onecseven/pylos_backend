@@ -1,7 +1,16 @@
 /node_modules
-/.node_persist
+/.node_persist/*
 .node_persist
 .node_modules
 /src/.node_persist
 /src/public
 .env
+.node-persist/storage/03b4843b3f6c7a99950aee5e79a53e3f
+.node-persist/storage/6dc719b19ef12454ea56051097999fc8
+.node-persist/storage/74e88872651989522a8d4eafb9a40180
+.node-persist/storage/5896092fc3261f1d47dd99a02c333d20
+.node-persist/storage/b69bee2ddb5bcb753eeaf5582f18c38a
+src/.node-persist/storage/0b27b2d6d1db5bb53117cb7950ecab7f
+.node-persist/storage/d6a9b920af25b1d240105bec4efe9c81
+src/.node-persist/storage/94f45f04099179f8156d275b55969e35
+src/.node-persist/storage/d6a9b920af25b1d240105bec4efe9c81
