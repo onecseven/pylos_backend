@@ -1,2 +1,5 @@
 /node_modules
+/.node_persist
+/src/.node_persist
+/src/public
 .env

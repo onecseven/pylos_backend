@@ -1,16 +1,21 @@
 // External libraries
+
 const express = require('express');
-const http = require('http');
+const path = require("path")
+const app = express()
+app.use("/client", express.static(path.join(__dirname, 'public')));
+const server = app.listen(3000, () => console.log("Server is listening on 3000!"))
 const WebSocket = require('ws');
+const wss = new WebSocket.Server({ server });
+
+// Internal libraries
+
+const router = require('./MessageRouter')
 const { getUniqueID } = require("./functions/helpers/getUniqueID");
 const users = require("./data/users")
 const register_user = require("./functions/user/register_user")
 const user_disconnected = require("./functions/user/user_disconnected")
-const server = http.createServer(express);
-const wss = new WebSocket.Server({ server });
 
-// Internal libraries
-const router = require('./MessageRouter')
 
 wss.on('connection', ws => {
     ws.id = getUniqueID();
@@ -31,10 +36,6 @@ wss.on('connection', ws => {
         console.log(`user ${ws.id} disconnected for ${reason} with code: ${code}`)
     })
 
-})
-
-server.listen(3000, /*'0.0.0.0',*/ function() {
-    console.log(`Server is listening on ${3000}!`)
 })
 
 
