@@ -14,15 +14,15 @@ let someone_joined = (room, user) => send_to_room(messages.USER_JOINED(room.id, 
 const join_room = async (user, data) => {
   let { roomId } = data
   let room = rooms.get(roomId)
-  if (room) {
+  if (room && room.game && room.hasUser(user.id)) await rejoin(user, data)
+  else if (room.users.length >= room.maxUsers) full_room(user.id)
+  else if (room) {
     let user_has_joined = room.join(user)
     if (user_has_joined) {
       user.has_joined_room(room.id)
       you_joined(room, user)
       someone_joined(room, user)
     } 
-    else if (room && room.game && room.hasUser(user.id)) await rejoin(user, data)
-    else if (room.users.length >= room.maxUsers) full_room(user.id)
   } 
   else wrong_code(user.id)
 }
