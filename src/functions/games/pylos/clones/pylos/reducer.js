@@ -75,9 +75,7 @@ let exec_RECOVER = (move, state) => {
         return move.player === helpers_js_1.default.tile_from_coords(state, coords).owner;
     });
     let recovery_within_bounds = move.payload.origins.length <= 2;
-    let recovery_on_allowed_levels = origins.every((coords) => {
-        return coords.z < 2;
-    });
+    let recovery_on_allowed_levels = placed_ball.z < 2;
     let balls_are_free = origins.every((coord) => {
         return helpers_js_1.default.is_ball_free(state, coord);
     });
