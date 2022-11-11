@@ -76,9 +76,10 @@ let exec_RECOVER = (move, state) => {
     });
     let recovery_within_bounds = move.payload.origins.length <= 2;
     let recovery_on_allowed_levels = placed_ball.z < 2;
-    let balls_are_free = origins.every((coord) => {
-        return helpers_js_1.default.is_ball_free(state, coord);
-    });
+    let balls_are_free = origins.length > 1 ?
+        helpers_js_1.default.is_ball_free(state, origins[0]) && helpers_js_1.default.is_ball_free(state, origins[1], origins[0])
+        :
+            helpers_js_1.default.is_ball_free(state, origins[0]); //UGLY HACK
     if (recover_bonus &&
         player_owns_balls &&
         recovery_within_bounds &&

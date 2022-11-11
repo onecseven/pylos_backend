@@ -91,9 +91,11 @@ let tile_from_coords = (state, coords) => {
     let grid = state.zones[z].grid;
     return grid.get_tile(x, y);
 };
-let is_ball_free = (state, origin) => {
+let is_ball_free = (state, origin, potential_non_blocker) => {
     let potential_blockers = get_potential_blockers(origin);
     for (let tile of potential_blockers) {
+        if (potential_non_blocker && coord_equality_check(tile, potential_non_blocker))
+            continue;
         let token = tile_from_coords(state, tile);
         if (token.type === "BALL") {
             return false;
