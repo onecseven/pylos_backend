@@ -9,7 +9,7 @@ let cases = {
   // "pylos move": game.process_move,
   // "user wants rematch": room.user_wants_rematch,
   "my rooms": user.get_rooms,
-  // "login": user.login,
+  "login": user.login,
   // "rejoin": room.rejoin
 }
 

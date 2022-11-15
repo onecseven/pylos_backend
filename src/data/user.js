@@ -90,8 +90,8 @@ const get_rooms_user_is_in = async (user_id) => {
 
 ; (async () => {
   // await get_user_by_id("notsati")
-  let q = await update_user("notati", "hypertatis2")
-  console.log(q)  
+  // let q = await update_user("notati", "hypertatis2")
+  // console.log(q)  
   // console.log(q)
   // let x = await get_rooms_user_is_in("notati")
 })();

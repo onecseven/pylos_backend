@@ -15,7 +15,7 @@ const { create_user, get_user_by_id } = require("./user")
  * @param {room_record} {object} room record
  * @returns {Model | null}
  */
-const create_room = async ({ room_id, max_users, host, game = null }) => {
+const create_room = async ({ room_id, max_users = 2, host, game = null }) => {
   await db.sync()
   try {
     let room = await Room.create({ room_id, max_users, host, game })
@@ -89,7 +89,7 @@ const get_room_by_id = async (room_id) => {
 /**
  *
  * @param {string} room_id
- * @returns {Model | null}
+ * @returns {string[]}
  */
 const get_users_on_room = async (room_id) => {
   await db.sync()
@@ -102,9 +102,9 @@ const get_users_on_room = async (room_id) => {
     // console.log("Got Room: ", JSON.stringify(room, null, 2))
     if (room) {
       let users = await room.getUsers()
-      console.log(JSON.stringify(users, null, 2))
+      return users?.map((user) => user.user_id)
     }
-    return users
+    return null
   } catch (e) {
     console.error(e)
   }
@@ -112,10 +112,12 @@ const get_users_on_room = async (room_id) => {
 
 ;(async () => {
   // await create_user({ user_id: "notati", name: "rungen" })
-  // await create_room({ room_id: "lol", max_users: 2, host: "notati" })
+  // await create_room({ room_id: "loul", host: "notati" })
   // await add_user_to_room("lol", "notati")
   // await get_users_on_room("lol")
   // await update_game_in_room("lol", JSON.stringify(["hi","hey", "how are you"]))
+  // await get_users_on_room("lol")
+  // await get_room_by_id("loul")
 })()
 
 module.exports = {
@@ -123,5 +125,5 @@ module.exports = {
   add_user_to_room,
   update_game_in_room,
   get_room_by_id,
-  get_users_on_room
+  get_users_on_room,
 }
