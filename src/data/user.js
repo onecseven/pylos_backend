@@ -38,7 +38,7 @@ const create_user = async ({user_id, name}) => {
   await db.sync()
   try {
     let user = await User.create({ user_id, name })
-    console.log("User Created: ", JSON.stringify(user, null, 2))
+    console.log("User Created: ", user.user_id)
     return user
   } catch (e) {
     console.error(e)
@@ -58,7 +58,7 @@ const get_user_by_id = async (user_id) => {
         user_id,
       },
     })
-    console.log("Got User: ", JSON.stringify(user, null, 2))
+    console.log("Got User: ", user?.user_id)
     return user
   } catch (e) {
     console.error(e)
@@ -77,7 +77,7 @@ const get_rooms_user_is_in = async (user_id) => {
         user_id,
       },
     })
-    console.log("Got User: ", JSON.stringify(user, null, 2))
+    console.log("Got User: ", user.user_id)
     if (user) {
       let rooms = await user.getRooms()
       return rooms?.map(room => room.room_id)
