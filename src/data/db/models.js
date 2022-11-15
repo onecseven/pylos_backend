@@ -1,8 +1,8 @@
 const db = require("./db")
 const Sequelize = require("Sequelize")
 
-
-const User = db.define("user", 
+const User = db.define(
+  "user",
   {
     user_id: {
       type: Sequelize.TEXT,
@@ -20,8 +20,8 @@ const User = db.define("user",
   }
 )
 
-
-const Room = db.define("room",
+const Room = db.define(
+  "room",
   {
     room_id: {
       type: Sequelize.TEXT,
@@ -38,12 +38,12 @@ const Room = db.define("room",
     },
     host: {
       type: Sequelize.TEXT,
-      allowNull: false
+      allowNull: false,
     },
     rematch: {
       type: Sequelize.INTEGER,
-      allowNull: false
-    }
+      allowNull: false,
+    },
   },
   {
     modelName: "Room",
@@ -54,19 +54,24 @@ const Room = db.define("room",
 const RoomUsers = db.define("room_users", {})
 
 User.belongsToMany(Room, {
-  through: "room_users",
+  through: {
+    model: RoomUsers,
+  },
 })
 
 Room.belongsToMany(User, {
-  through: "room_users",
+  through: {
+    model: RoomUsers,
+  },
 })
 
-User.hasOne(Room,{
+User.hasOne(Room, {
   foreignKey: "host",
 })
 
+
 module.exports = {
-User,
-Room,
-RoomUsers
+  User,
+  Room,
+  RoomUsers,
 }

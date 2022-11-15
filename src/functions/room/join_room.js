@@ -1,29 +1,46 @@
 const rooms_db = require("../../data/room")
+const users_db = require("../../data/user")
 const messages = require("../messages")
 const send_data = require("../switchboard/send_to_user")
 const send_to_room = require("../switchboard/send_to_everyone")
 const rejoin = require("../room/rejoin")
 const db = require("../../data/db/db")
+const save_user = require("../user/save_user")
 
-let full_room = (id) => send_data(messages.FAILED_TO_JOIN_ROOM("room is full"), id)
-let room_started = (id) => send_data(messages.FAILED_TO_JOIN_ROOM("room is in game"), id)
-let already_in = (id) => send_data(messages.FAILED_TO_JOIN_ROOM("already inside this room"), id)
-let wrong_code = (id) => send_data(messages.FAILED_TO_JOIN_ROOM("wrong code"), id)
-let you_joined = (room, user) => send_data(messages.JOINED_ROOM(room.id, room.users, room.host), user.id)
-let someone_joined = (room, user) => send_to_room(messages.USER_JOINED(room.id, user), room.id)
+let full_room = (id) =>
+  send_data(messages.FAILED_TO_JOIN_ROOM("room is full"), id)
+let room_started = (id) =>
+  send_data(messages.FAILED_TO_JOIN_ROOM("room is in game"), id)
+let already_in = (id) =>
+  send_data(messages.FAILED_TO_JOIN_ROOM("already inside this room"), id)
+let wrong_code = (id) =>
+  send_data(messages.FAILED_TO_JOIN_ROOM("wrong code"), id)
+
+let you_joined = (room, id) =>
+  send_data(messages.JOINED_ROOM(room.id, room.users, room.host), id)
+
+let someone_joined = (room, user) =>
+  send_to_room(messages.USER_JOINED(room.id, user), room.id)
 
 const join_room = async (user, data) => {
+  let user_exists = await users_db.get_user_by_id(user.id)
+  if (!user_exists) await save_user(user)
   let { roomId } = data
   let room = await rooms_db.get_room_by_id(roomId)
   if (room) {
     let users_in_room = await rooms_db.get_users_on_room(roomId)
-    if (users_in_room.includes(user.id) && room.game) await rejoin(user, data)
-    else if (!users_in_room.includes(user.id) && room.game) room_started(user.id)
-    else if (users_in_room.length >= room.max_users) full_room(user.id)
-    else if (!room.game) {
+    if (users_in_room.includes(user.id) && room.game) await rejoin(user, data) //need test
+    else if (!users_in_room.includes(user.id) && room.game) //need test
+      room_started(user.id)
+    else if (users_in_room.length >= room.max_users) full_room(user.id) //working
+    else if (!room.game) { //working
       await rooms_db.add_user_to_room(roomId, user.id)
-      you_joined({id: room.room_id, users: users_in_room, host: room.host}, user.id)
-      someone_joined({id: room_id}, user)
+      let room_users = await rooms_db.get_users_on_room(roomId)
+      you_joined(
+        { id: room.room_id, users: room_users, host: room.host },
+        user.id
+      )
+      someone_joined({ id: room.room_id }, user)
       return
     }
   }
@@ -35,8 +52,8 @@ const join_room = async (user, data) => {
   //     user.has_joined_room(room.id)
   //     you_joined(room, user)
   //     someone_joined(room, user)
-  //   } 
-  // } 
+  //   }
+  // }
   // else wrong_code(user.id)
 }
 
