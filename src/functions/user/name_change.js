@@ -10,7 +10,7 @@ const change_name = async (user, data) => {
       send_data(messages.YOUR_ID(user.id, user.name), user.id)
       user.name = data.name
     } else {
-      send_data(messages.YOUR_ID(user.id, user.name), user.id)
+      send_data(messages.MOVE_FAILED("Name change did not happen"), user.id)
     }
   }
 }

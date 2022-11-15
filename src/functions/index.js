@@ -20,11 +20,11 @@ module.exports = {
     rejoin
   },
   user: {
-    name_change,
-    get_rooms,
-    // create_user,
-    remove_user,
-    login
+    name_change,//done
+    get_rooms, // todo 
+    // create_user, //todo
+    remove_user, //todo 
+    login //todo
   },
   game: {
     start_pylos,
