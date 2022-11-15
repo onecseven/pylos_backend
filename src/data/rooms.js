@@ -1,133 +1,127 @@
-const englishWordGen = require("../functions/helpers/wordGen")
-const storage = require("./storage")
-const deserialize_move_list = require("../functions/games/deserialize_move_list")
-class Room {
-  id = englishWordGen()[0]
-  users = []
-  maxUsers = 2
-  game = null
+const db = require("./db/db")
+const { Room, User, RoomUsers } = require("./db/models")
+const { create_user, get_user_by_id } = require("./user")
+/**
+ * @typedef room_record
+ * @type {object}
+ * @property {string} room_id - an unique ID.
+ * @property {number} max_users - usually 2.
+ * @property {string} game - json of played moves
+ * @property {string} host - id of room creator
+ */
 
-  constructor() {}
-
-  join(user) {
-    if (this.users.map((u) => u.id).includes(user.id)) {
-      this.connected(user.id)
-      return true
-    } 
-    if (this.maxUsers > this.users.length && this.game === null) {
-      this.users.push({
-        id: user.id,
-        name: user.name,
-        rematch: false,
-        connected: true,
-      })
-      return true
+/**
+ *
+ * @param {room_record} {object} room record
+ * @returns {Model | null}
+ */
+const create_room = async ({ room_id, max_users, host, game = null }) => {
+  await db.sync()
+  try {
+    let room = await Room.create({ room_id, max_users, host, game })
+    if (room) {
+      console.log("Room Created: ", JSON.stringify(room, null, 2))
+      let user = await get_user_by_id(host)
+      room.addUser(user)
     }
-    return false
+    return room
+  } catch (e) {
+    console.error(e)
   }
+}
 
-  wants_rematch(id) {
-    this.users.find(user => user.id === id).rematch === true
+/**
+ *
+ * @param {string} room_id
+ * @param {string} user_id
+ * @returns {Model | null}
+ */
+const add_user_to_room = async (room_id, user_id) => {
+  await db.sync()
+  try {
+    let room = await get_room_by_id(room_id)
+    let user = await get_user_by_id(user_id)
+    if (room && user) room.addUser([user])
+  } catch (e) {
+    console.error(e)
   }
+}
 
-  clear_rematch() {
-    this.users.forEach(user => {
-      user.rematch = false
+/**
+ *
+ * @param {string} room_id
+ * @param {string[]} move_list
+ * @returns {Model | null}
+ */
+const update_game_in_room = async (room_id, move_list) => {
+  await db.sync()
+  try {
+    let room = await get_room_by_id(room_id)
+    room.update({ game: JSON.stringify(move_list) })
+    console.log(
+      "Updated Game in Room " + room_id + ":",
+      JSON.stringify(move_list)
+    )
+    return room
+  } catch (e) {
+    console.error(e)
+  }
+}
+/**
+ *
+ * @param {string} room_id
+ * @returns {Model | null}
+ */
+const get_room_by_id = async (room_id) => {
+  await db.sync()
+  try {
+    let user = await Room.findOne({
+      where: {
+        room_id,
+      },
     })
+    console.log("Got Room: ", JSON.stringify(user, null, 2))
+    return user
+  } catch (e) {
+    console.error(e)
   }
-
-  exit(userid) {
-    this.users = this.users.filter((user) => user.id !== userid)
-  }
-
-  disconnected(userid) {
-    let user = this.users.find((user) => user.id === userid)
-    user.connected = false
-  }
-
-  connected(userid) {
-    let user = this.users.find((user) => user.id === userid)
-    user.connected = true
-  }
-
-  isHost(userid) {
-    return this.users[0].id === userid
-  }
-
-  hasUser(userid) {
-    return this.users.map((user) => user.id).includes(userid)
-  }
-
-  getHost() {
-    return this.users[0]
-  }
-
-  serialize() {
-    return {
-      id: this.id,
-      users: this.users,
-      maxUsers: this.maxUsers,
-      game: this.game?.serial_state?.move_history
+}
+/**
+ *
+ * @param {string} room_id
+ * @returns {Model | null}
+ */
+const get_users_on_room = async (room_id) => {
+  await db.sync()
+  try {
+    let room = await Room.findOne({
+      where: {
+        room_id,
+      },
+    })
+    // console.log("Got Room: ", JSON.stringify(room, null, 2))
+    if (room) {
+      let users = await room.getUsers()
+      console.log(JSON.stringify(users, null, 2))
     }
-  }
-
-  static deserialize(serializedRoom) {
-    let temp = new Room()
-    if (serializedRoom.game) {
-      let temp_game = deserialize_move_list(serializedRoom.game)
-      serializedRoom.game = temp_game
-    }
-    Object.assign(temp, serializedRoom)
-    return temp
+    return users
+  } catch (e) {
+    console.error(e)
   }
 }
 
-class Rooms {
-  rooms = new Map()
+;(async () => {
+  // await create_user({ user_id: "notati", name: "rungen" })
+  // await create_room({ room_id: "lol", max_users: 2, host: "notati" })
+  // await add_user_to_room("lol", "notati")
+  // await get_users_on_room("lol")
+  // await update_game_in_room("lol", JSON.stringify(["hi","hey", "how are you"]))
+})()
 
-  get(id) {
-    if (this.rooms.has(id)) return this.rooms.get(id)
-    return null
-  }
-
-  create() {
-    let room = new Room()
-    this.add(room)
-    return room
-  }
-
-  add(room) {
-    this.rooms.set(room.id, room)
-  }
-
-  remove(room) {
-    this.rooms.delete(room.id)
-  }
-
-  async stored_lookup(roomid) {
-    let keys = await storage.keys()
-    if (keys.includes(roomid)){
-      return await this.rehydrate(roomid)
-    } else {
-      return null
-    }
-  }
-
-  async dehydrate(room) {
-    console.log("Dehydrating room: " + room.id)
-    await storage.setItem(room.id, room.serialize())
-    this.remove(room)
-  }
-
-  async rehydrate(roomid) {
-    console.log("Rehydrating room: " + roomid)
-    let temp = await storage.getItem(roomid)
-    let room = Room.deserialize(temp)
-    this.add(room)
-    return room
-  }
+module.exports = {
+  create_room,
+  add_user_to_room,
+  update_game_in_room,
+  get_room_by_id,
+  get_users_on_room
 }
-
-let singleton = new Rooms()
-
-module.exports = singleton

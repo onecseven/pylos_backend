@@ -1,5 +1,5 @@
-const rooms = require("../../data/rooms")
-const users = require("../../data/users")
+const rooms = require("../../data/rooms.old")
+const users = require("../../data/users.old")
 
 const on_disconnect = async (user, room) => {
   room.disconnected(user.id)

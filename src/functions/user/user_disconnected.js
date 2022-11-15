@@ -1,9 +1,8 @@
 const switchboard = require("../../data/Switchboard")
-const users = require("../../data/users")
-const rooms = require("../../data/rooms")
+const users = require("../../data/users.old")
+const rooms = require("../../data/rooms.old")
 const on_disconnect = require("../room/on_disconnect")
 
-// change this to switch board
 const user_disconnected = async (user, code) => {
   switchboard.remove(user.id)
 
@@ -20,7 +19,10 @@ const user_disconnected = async (user, code) => {
       .filter((room) => room.game !== null)
       .map((room) => room.id)
     user.rooms = filtered
-    if (user.rooms.length) await users.log_out(user.id)
+    if (user.rooms.length) {
+      await users.save_user(user.id)
+      users.remove(user.id)
+    } 
   }
 }
 

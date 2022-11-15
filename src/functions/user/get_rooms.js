@@ -4,7 +4,6 @@ const rooms = require("../../data/rooms")
 const send_data = require("../switchboard/send_to_user")
 const messages = require("../messages")
 
-// change this to switch board
 const get_rooms =  async (user)  => {
   if (user.rooms.length) {
     let filtered = []
