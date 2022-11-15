@@ -1,7 +1,5 @@
 const switchboard = require("../../data/Switchboard")
-const users = require("../../data/users.old")
-const rooms = require("../../data/rooms.old")
-const on_disconnect = require("../room/on_disconnect")
+// const on_disconnect = require("../room/on_disconnect")
 
 const user_disconnected = async (user, code) => {
   switchboard.remove(user.id)
