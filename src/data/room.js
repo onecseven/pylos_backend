@@ -18,7 +18,7 @@ const { create_user, get_user_by_id } = require("./user")
 const create_room = async ({ room_id, max_users = 2, host, game = null }) => {
   await db.sync()
   try {
-    let room = await Room.create({ room_id, max_users, host, game })
+    let room = await Room.create({ room_id, max_users, host, game, rematch: 0 })
     if (room) {
       console.log("Room Created: ", JSON.stringify(room, null, 2))
       let user = await get_user_by_id(host)
@@ -75,13 +75,13 @@ const update_game_in_room = async (room_id, move_list) => {
 const get_room_by_id = async (room_id) => {
   await db.sync()
   try {
-    let user = await Room.findOne({
+    let room = await Room.findOne({
       where: {
         room_id,
       },
     })
-    console.log("Got Room: ", JSON.stringify(user, null, 2))
-    return user
+    console.log("Got Room: ", JSON.stringify(room, null, 2))
+    return room
   } catch (e) {
     console.error(e)
   }
@@ -94,17 +94,13 @@ const get_room_by_id = async (room_id) => {
 const get_users_on_room = async (room_id) => {
   await db.sync()
   try {
-    let room = await Room.findOne({
+    let users = await RoomUsers.findAll({
       where: {
-        room_id,
+        roomRoomId: room_id,
       },
+      order: [["updatedAt", "ASC"]],
     })
-    // console.log("Got Room: ", JSON.stringify(room, null, 2))
-    if (room) {
-      let users = await room.getUsers()
-      return users?.map((user) => user.user_id)
-    }
-    return null
+    return users?.map(({ userUserId, roomRoomId }) => userUserId)
   } catch (e) {
     console.error(e)
   }
@@ -112,12 +108,19 @@ const get_users_on_room = async (room_id) => {
 
 ;(async () => {
   // await create_user({ user_id: "notati", name: "rungen" })
-  // await create_room({ room_id: "loul", host: "notati" })
+  await create_user({ user_id: "sitati", name: "rongen" })
+  // let x =  await get_room_by_id("loul2")
+  // let x = await create_room({ room_id: "loul2", host: "notati" })
+  // let y = x.hasUser()
+  await add_user_to_room("loul2", "sitati")
+  // console.log( x.hasUser("notati"))
+  // x.rematch = 1
+  // x.save()
   // await add_user_to_room("lol", "notati")
   // await get_users_on_room("lol")
   // await update_game_in_room("lol", JSON.stringify(["hi","hey", "how are you"]))
-  // await get_users_on_room("lol")
-  // await get_room_by_id("loul")
+  let x = await get_users_on_room("loul2")
+  console.log(x)
 })()
 
 module.exports = {
