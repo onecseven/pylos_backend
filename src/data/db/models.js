@@ -39,6 +39,10 @@ const Room = db.define("room",
     host: {
       type: Sequelize.TEXT,
       allowNull: false
+    },
+    rematch: {
+      type: Sequelize.INTEGER,
+      allowNull: false
     }
   },
   {
