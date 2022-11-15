@@ -16,10 +16,10 @@ const login = require("./user/login")
 
 module.exports = {
   room: {
-    join_room, //changed, needs testing
-    create_room, //changed, needs testing
+    join_room, //tested, partial complete
+    create_room, //tested, complete
   //   leave_room, // turned off
-    user_wants_rematch, //changed, needs testing
+    user_wants_rematch, //tested, partial complete (needs games tow ork)
   //   rejoin // changed, should work
   },
   user: {
