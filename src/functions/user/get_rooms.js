@@ -1,27 +1,12 @@
 const switchboard = require("../../data/Switchboard")
-const users = require("../../data/users")
-const rooms = require("../../data/rooms")
+const users_db = require("../../data/user")
 const send_data = require("../switchboard/send_to_user")
 const messages = require("../messages")
 
-const get_rooms =  async (user)  => {
-  if (user.rooms.length) {
-    let filtered = []
-    for (let id of user.rooms) {
-      let room = rooms.get(id)
-      if (!room) {
-        room = await rooms.stored_lookup(id)
-      }
-      if (room) {
-        filtered.push(room)
-      }
-    }
-    user.rooms = filtered.map(room => room.id)
-    send_data(messages.YOUR_ROOMS(filtered), user.id)
-    return user.rooms 
-  } else {
-    send_data(messages.YOUR_ROOMS([]), user.id)
-  }
-}   
+const get_rooms = async (user) => {
+  let user_rooms = users_db.get_rooms_user_is_in(user.id)
+  if (user_rooms) send_data(messages.YOUR_ROOMS(filtered), user.id)
+  else send_data(messages.YOUR_ROOMS([]), user.id)
+}
 
 module.exports = get_rooms
