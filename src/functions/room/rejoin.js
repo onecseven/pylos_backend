@@ -15,7 +15,7 @@ const rejoin = async (user, data) => {
     if (!users) {
       return null //message?
     }
-
+    //check that a game is going on
     send_data(messages.JOINED_ROOM(room.room_id, users, room.host), user.id)
     send_data(messages.GAME_STARTED(room.id), user.id)
     users.forEach((u, i) => {

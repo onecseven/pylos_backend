@@ -26,21 +26,19 @@ const join_room = async (user, data) => {
   let user_exists = await users_db.get_user_by_id(user.id)
   if (!user_exists) await save_user(user)
   let { roomId } = data
-  let room = await rooms_db.get_room_by_id(roomId)
+  let room = await rooms_db.get_room_with_users(roomId)
   if (room) {
-    let users_in_room = await rooms_db.get_users_on_room(roomId)
-    if (users_in_room.includes(user.id) && room.game) await rejoin(user, data) //need test
-    else if (!users_in_room.includes(user.id) && room.game) //need test
-      room_started(user.id)
-    else if (users_in_room.length >= room.max_users) full_room(user.id) //working
+    if (room.users.map(user => user.user_id).includes(user.id) && room.game?.length) await rejoin(user, data) //need test
+    else if (room.users.length >= room.max_users) full_room(user.id) 
     else if (!room.game) { //working
       await rooms_db.add_user_to_room(roomId, user.id)
-      let room_users = await rooms_db.get_users_on_room(roomId)
+      room = await rooms_db.get_room_with_users(roomId)
+      console.log(JSON.stringify(room.users, null, 2))
       you_joined(
-        { id: room.room_id, users: room_users, host: room.host },
+        { id: room.room_id, users: room.users, host: room.host },
         user.id
       )
-      someone_joined({ id: room.room_id }, user)
+      someone_joined({ user_id: room.room_id }, user)
       return
     }
   }

@@ -15,7 +15,6 @@ const create_room = async (user) => {
     })
     .then(async (room) => {
       await rooms_db.get_room_with_users(room.room_id).then((room) => {
-        console.log(JSON.stringify(room, null, 2))
         send_data(
           messages.JOINED_ROOM(room.room_id, room.users, room.host),
           user.id
