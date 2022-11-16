@@ -3,6 +3,7 @@ const switchboard = require("../../data/Switchboard")
 
 const user_disconnected = async (user, code) => {
   switchboard.remove(user.id)
+  delete user
   //TODO gotta move all this shit
   // if (user.rooms.length) {
   //   user.rooms.forEach(async (roomid) => {
