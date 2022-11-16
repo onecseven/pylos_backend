@@ -1,6 +1,8 @@
 const db = require("./db/db")
 const { Room, User, RoomUsers } = require("./db/models")
 const { create_user, get_user_by_id } = require("./user")
+
+
 /**
  * @typedef room_record
  * @type {object}
@@ -22,7 +24,7 @@ const create_room = async ({ room_id, max_users = 2, host, game = null }) => {
     if (room) {
       console.log("Room Created: ", room.room_id)
       let user = await get_user_by_id(host)
-      room.addUser(user)
+      await room.addUser(user)
     }
     return room
   } catch (e) {
@@ -98,7 +100,7 @@ const get_room_by_id = async (room_id) => {
 const get_users_on_room = async (room_id) => {
   //lmao get fucked sequelize... i dont have to "associate" shit
   let query_string =
-    "SELECT `user`.`user_id`, `user`.`name`, `room_users`.`updatedAt` AS `room_users.updatedAt`, `room_users`.`userUserId` AS `room_users.userUserId`, `room_users`.`roomRoomId` AS `room_users.roomRoomId` FROM `users` AS `user` INNER JOIN `room_users` AS `room_users` ON `user`.`user_id` = `room_users`.`userUserId` AND `room_users`.`roomRoomId` =" +
+    "SELECT `users`.`user_id`, `users`.`name` FROM `users` AS `users` INNER JOIN `room_users`  ON `users`.`user_id` = `room_users`.`userUserId` AND `room_users`.`roomRoomId` =" +
     "'" +
     room_id +
     "'" +
@@ -106,6 +108,7 @@ const get_users_on_room = async (room_id) => {
   await db.sync()
   try {
     let [results, meta] = await db.query(query_string)
+    console.log(JSON.stringify(results, null, 2))
     if (results.length) {
       return results.map(({ user_id, name }) => ({ user_id, name }))
     }
@@ -113,6 +116,65 @@ const get_users_on_room = async (room_id) => {
     console.error(e)
   }
 }
+
+const get_room_with_users = async (room_id) => {
+  //lmao get fucked sequelize... i dont have to "associate" shit
+  let query_string =
+    "SELECT `user`.`user_id`, `user`.`name` FROM `users` AS `user` INNER JOIN `room_users` AS `room_users` ON `user`.`user_id` = `room_users`.`userUserId` AND `room_users`.`roomRoomId` =" +
+    "'" +
+    room_id +
+    "'" +
+    " ORDER BY `room_users`.`updatedAt` ASC;"
+
+  await db.sync()
+  try {
+    let [results, meta] = await db.query(query_string)
+    let room = await Room.findByPk(room_id, {attributes: ['room_id', 'max_users', 'game', 'host', 'rematch']})
+    if (room && results) {
+      return {
+        ...room.toJSON(),
+        users: results.map(({ user_id, name }) => ({ user_id, name }))
+      }
+    }
+    return null 
+  } catch (e) {
+    console.error(e)
+    return null
+  }
+}
+
+const get_user_with_rooms_with_users = async (user_id) => {
+  //lmao get fucked sequelize... i dont have to "associate" shit
+
+  let query_string =
+    "SELECT `rooms`.`room_id`, `rooms`.`max_users`, `rooms`.`game`,`rooms`.`host`, `rooms`.`rematch` FROM `rooms` AS `rooms` INNER JOIN `room_users` as `room_users` ON `rooms`.`room_id` = `room_users`.`roomRoomId` and `room_users`.`userUserId` ='" +
+    user_id +
+    "';"
+  try {
+    let [results, meta] = await db.query(query_string)
+    let user = await User.findByPk(user_id, {
+      attributes: ["user_id", "name"],
+    })
+    if (user && results) {
+      let filtered = []
+      for (let room of results) {
+        console.log("HERE", room)
+        let users = await get_users_on_room(room.room_id)
+        filtered.push({...room, users})
+      }
+      console.log(filtered)
+      return {
+        ...user.toJSON(),
+        rooms: filtered,
+      }
+    }
+    return null
+  } catch (e) {
+    console.error(e)
+    return null
+  }
+}
+
 
 ;(async () => {
   // await create_user({ user_id: "notati", name: "rungen" })
@@ -126,7 +188,7 @@ const get_users_on_room = async (room_id) => {
   // x.save()
   // await add_user_to_room("lol", "notati")
   // await update_game_in_room("lol", JSON.stringify(["hi","hey", "how are you"]))
-  // let x = await get_users_on_room("loul2")
+  // console.log(JSON.stringify(x, null, 2))
 })()
 
 module.exports = {
@@ -135,4 +197,6 @@ module.exports = {
   update_game_in_room,
   get_room_by_id,
   get_users_on_room,
+  get_room_with_users,
+  get_user_with_rooms_with_users
 }

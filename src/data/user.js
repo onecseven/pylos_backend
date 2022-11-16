@@ -11,7 +11,7 @@ const { Room, User, RoomUsers } = require("./db/models")
 /**
  *
  * @param {string} id
- * @param {string} new_name 
+ * @param {string} new_name
  * @returns {Model | null}
  */
 const update_user = async (user_id, new_name) => {
@@ -19,14 +19,13 @@ const update_user = async (user_id, new_name) => {
   try {
     let user = await get_user_by_id(user_id)
     if (user) {
-      let result = await user.update({name: new_name})
+      let result = await user.update({ name: new_name })
       return result
     }
   } catch (e) {
     console.error(e)
     return null
   }
-
 }
 
 /**
@@ -34,7 +33,7 @@ const update_user = async (user_id, new_name) => {
  * @param {user_record}
  * @returns {Model | null}
  */
-const create_user = async ({user_id, name}) => {
+const create_user = async ({ user_id, name }) => {
   await db.sync()
   try {
     let user = await User.create({ user_id, name })
@@ -65,9 +64,9 @@ const get_user_by_id = async (user_id) => {
   }
 }
 /**
- * 
- * @param {*} user_id 
- * @returns 
+ *
+ * @param {*} user_id
+ * @returns
  */
 const get_rooms_user_is_in = async (user_id) => {
   await db.sync()
@@ -77,10 +76,11 @@ const get_rooms_user_is_in = async (user_id) => {
         user_id,
       },
     })
-    console.log("Got User: ", user.user_id)
+    console.log("Got User: ", user?.user_id)
     if (user) {
       let rooms = await user.getRooms()
-      return rooms?.map(room => room.room_id)
+      console.log(JSON.stringify(rooms, null, 2))
+      return rooms?.map((room) => room.room_id)
     }
     return user
   } catch (e) {
@@ -88,17 +88,47 @@ const get_rooms_user_is_in = async (user_id) => {
   }
 }
 
-; (async () => {
+const get_user_with_rooms = async (user_id) => {
+  //lmao get fucked sequelize... i dont have to "associate" shit
+
+  let query_string =
+    "SELECT `rooms`.`room_id`, `rooms`.`max_users`, `rooms`.`game`,`rooms`.`host`, `rooms`.`rematch` FROM `rooms` AS `rooms` INNER JOIN `room_users` as `room_users` ON `rooms`.`room_id` = `room_users`.`roomRoomId` and `room_users`.`userUserId` ='" +
+    user_id +
+    "';"
+  try {
+    let [results, meta] = await db.query(query_string)
+    let user = await User.findByPk(user_id, {
+      attributes: ["user_id", "name"],
+    })
+    if (user && results) {
+      return {
+        ...user.toJSON(),
+        rooms: results ? [...results] : [],
+      }
+    }
+    return null
+  } catch (e) {
+    console.error(e)
+    return null
+  }
+}
+
+const get_user_with_rooms_with_users = async (user_id) => {}
+
+;(async () => {
   // await get_user_by_id("notsati")
   // let q = await update_user("notati", "hypertatis2")
-  // console.log(q)  
+  // console.log(q)
   // console.log(q)
   // let x = await get_rooms_user_is_in("notati")
-})();
+  // let x = await get_user_with_rooms("tati")
+  // console.log(x)
+})()
 
 module.exports = {
   create_user,
   get_user_by_id,
   get_rooms_user_is_in,
-  update_user
+  update_user,
+  get_user_with_rooms,
 }
