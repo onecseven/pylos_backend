@@ -39,7 +39,6 @@ wss.on("connection", (ws) => {
 
   ws.on("close", async (code, reason) => {
     await user_disconnected(user, code)
-    delete user
     reason = reason != "" ? "reason: " + reason : "unknown reason"
     console.log(`user ${ws.id} disconnected for ${reason} with code: ${code}`)
   })

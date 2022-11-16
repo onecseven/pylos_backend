@@ -50,18 +50,22 @@ const add_user_to_room = async (room_id, user_id) => {
 /**
  *
  * @param {string} room_id
- * @param {string[]} move_list
+ * @param {object} new_move
  * @returns {Model | null}
  */
-const update_game_in_room = async (room_id, move_list) => {
+const update_game_in_room = async (room_id, new_move) => {
   await db.sync()
   try {
     let room = await get_room_by_id(room_id)
+    if (!room.move_list) room.move_list = "[]"
+    let move_list = JSON.parse(room.move_list)
+    move_list.push(new_move)
     room.update({ game: JSON.stringify(move_list) })
     console.log(
       "Updated Game in Room " + room_id + ":",
-      JSON.stringify(move_list)
+      JSON.stringify(new_move, null, 2)
     )
+    room.save()
     return room
   } catch (e) {
     console.error(e)
@@ -89,7 +93,7 @@ const get_room_by_id = async (room_id) => {
 /**
  *
  * @param {string} room_id
- * @returns {string[]}
+ * @returns {{user_id, name}[]}
  */
 const get_users_on_room = async (room_id) => {
   //lmao get fucked sequelize... i dont have to "associate" shit
