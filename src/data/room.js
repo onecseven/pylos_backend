@@ -108,7 +108,6 @@ const get_users_on_room = async (room_id) => {
   await db.sync()
   try {
     let [results, meta] = await db.query(query_string)
-    console.log(JSON.stringify(results, null, 2))
     if (results.length) {
       return results.map(({ user_id, name }) => ({ user_id, name }))
     }

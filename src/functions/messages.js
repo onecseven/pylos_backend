@@ -1,8 +1,9 @@
 module.exports = {
   YOUR_ID: (id, name) => ({ message: "Your id", id: id, name: name }),
+  ERROR: (error) => ({ message: "error", error }),
   JOINED_ROOM: (roomId, usersND, host) => ({
     message: "Joined room",
-    roomId: roomId,
+    room_id: roomId,
     usersND: usersND,
     host: host,
   }),
@@ -12,7 +13,7 @@ module.exports = {
   }),
   USER_JOINED: (roomId, userND) => ({
     message: "User joined",
-    roomId: roomId,
+    room_id: roomId,
     userND: userND,
   }),
   USER_LEFT: (roomId, userId) => ({
@@ -25,8 +26,8 @@ module.exports = {
     roomId: roomId,
     userId: userId,
   }),
-  ROOM_DELETED: (roomId) => ({ message: "Game deleted", roomId: roomId }),
-  GAME_STARTED: (roomId) => ({ message: "Game started", roomId: roomId }),
+  ROOM_DELETED: (roomId) => ({ message: "Game deleted", room_id: roomId }),
+  GAME_STARTED: (roomId) => ({ message: "Game started", room_id: roomId }),
   GAME_START_FAIL: (reason) => ({ message: "Game failed to start", reason }),
   GAME_STATE: (serialized_state) => ({
     message: "Game state update",
