@@ -29,8 +29,8 @@ module.exports = {
     remove_user, //todo 
     login // working
   },
-  // game: {
-  //   start_pylos,
-  //   process_move,
-  // }
+  game: {
+    start_pylos, //testing 
+    process_move, //testing
+  }
 }
