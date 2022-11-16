@@ -103,7 +103,7 @@ const get_user_with_rooms = async (user_id) => {
     if (user && results) {
       return {
         ...user.toJSON(),
-        rooms: results ? [...results] : [],
+        rooms: results,
       }
     }
     return null
@@ -113,7 +113,6 @@ const get_user_with_rooms = async (user_id) => {
   }
 }
 
-const get_user_with_rooms_with_users = async (user_id) => {}
 
 ;(async () => {
   // await get_user_by_id("notsati")

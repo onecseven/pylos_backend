@@ -4,8 +4,8 @@ const user_wants_rematch = require("./room/user_wants_rematch")
 // const leave_room = require("./room/leave_room")
 // const rejoin = require("./room/rejoin")
 
-// const start_pylos = require("./games/start_pylos")
-// const process_move = require("./games/process_move")
+const start_pylos = require("./games/start_pylos")
+const process_move = require("./games/process_move")
 
 const name_change = require("./user/name_change")
 const get_rooms = require("./user/get_rooms")
@@ -30,7 +30,7 @@ module.exports = {
     login // working
   },
   game: {
-    start_pylos, //testing 
-    process_move, //testing
+    start_pylos, //seems to be working
+    process_move, //seems to be working
   }
 }
