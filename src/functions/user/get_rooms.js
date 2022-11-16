@@ -7,14 +7,9 @@ const messages = require("../messages")
 
 // we want room.users and room.id
 const get_rooms = async (user) => {
-  let user_rooms = await users_db.get_rooms_user_is_in(user.id)
-  let result = []
-  if (user_rooms) {
-    for (let room_id of user_rooms) {
-      let users = await rooms_db.get_users_on_room(room_id)
-      if (users) result.push({ id: room_id, users })
-    }
-    send_data(messages.YOUR_ROOMS(result), user.id)
+  let actual_user = await rooms_db.get_user_with_rooms_with_users(user.id)
+   if (actual_user && actual_user.rooms.length) {
+    send_data(messages.YOUR_ROOMS(actual_user.rooms), user.id)
   } else send_data(messages.YOUR_ROOMS([]), user.id)
 }
 
