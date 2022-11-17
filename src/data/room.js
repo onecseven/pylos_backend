@@ -1,7 +1,6 @@
 const db = require("./db/db")
 const { Room, User, RoomUsers } = require("./db/models")
-const { create_user, get_user_by_id } = require("./user")
-
+const { get_user_by_id } = require("./user")
 
 /**
  * @typedef room_record
@@ -48,7 +47,23 @@ const add_user_to_room = async (room_id, user_id) => {
     console.error(e)
   }
 }
-
+/**
+ *
+ * @param {string} room_id
+ * @returns {Model<Room> | null }
+ */
+const start_game_in_room = async (room_id) => {
+  await db.sync()
+  try {
+    let room = await get_room_by_id(room_id)
+    await room.update({ game: JSON.stringify([]) })
+    await room.save()
+    return room
+  } catch (e) {
+    console.error(e)
+    return null
+  }
+}
 /**
  *
  * @param {string} room_id
@@ -59,8 +74,8 @@ const update_game_in_room = async (room_id, new_move) => {
   await db.sync()
   try {
     let room = await get_room_by_id(room_id)
-    if (!room.move_list) room.move_list = "[]"
-    let move_list = JSON.parse(room.move_list)
+    if (!room.game) room.game = "[]"
+    let move_list = JSON.parse(room.game)
     move_list.push(new_move)
     room.update({ game: JSON.stringify(move_list) })
     console.log(
@@ -128,14 +143,16 @@ const get_room_with_users = async (room_id) => {
   await db.sync()
   try {
     let [results, meta] = await db.query(query_string)
-    let room = await Room.findByPk(room_id, {attributes: ['room_id', 'max_users', 'game', 'host', 'rematch']})
+    let room = await Room.findByPk(room_id, {
+      attributes: ["room_id", "max_users", "game", "host", "rematch"],
+    })
     if (room && results) {
       return {
         ...room.toJSON(),
-        users: results.map(({ user_id, name }) => ({ user_id, name }))
+        users: results.map(({ user_id, name }) => ({ user_id, name })),
       }
     }
-    return null 
+    return null
   } catch (e) {
     console.error(e)
     return null
@@ -157,11 +174,9 @@ const get_user_with_rooms_with_users = async (user_id) => {
     if (user && results) {
       let filtered = []
       for (let room of results) {
-        console.log("HERE", room)
         let users = await get_users_on_room(room.room_id)
-        filtered.push({...room, users})
+        filtered.push({ ...room, users })
       }
-      console.log(filtered)
       return {
         ...user.toJSON(),
         rooms: filtered,
@@ -174,6 +189,33 @@ const get_user_with_rooms_with_users = async (user_id) => {
   }
 }
 
+const flush_rooms = async (room_id_array) => {
+  await db.sync()
+  try {
+    for (let room_id of room_id_array) {
+      console.log(`Destroying room: ` + room_id)
+      await Room.destroy({ where: { room_id } })
+    }
+    delete_old_rooms()
+    return null
+  } catch (e) {
+    console.error(e)
+    return null
+  }
+}
+
+const delete_old_rooms = async () => {
+  let query_string =
+    "SELECT * FROM `rooms` WHERE `rooms`.`updatedAt` < DATETIME('NOW', '-168 hours');"
+  try {
+    let [results, meta] = await db.query(query_string)
+    console.log(JSON.stringify(results, null, 2))
+    return null
+  } catch (e) {
+    console.error(e)
+    return null
+  }
+}
 
 ;(async () => {
   // await create_user({ user_id: "notati", name: "rungen" })
@@ -188,6 +230,7 @@ const get_user_with_rooms_with_users = async (user_id) => {
   // await add_user_to_room("lol", "notati")
   // await update_game_in_room("lol", JSON.stringify(["hi","hey", "how are you"]))
   // console.log(JSON.stringify(x, null, 2))
+  // delete_old_rooms()
 })()
 
 module.exports = {
@@ -197,5 +240,7 @@ module.exports = {
   get_room_by_id,
   get_users_on_room,
   get_room_with_users,
-  get_user_with_rooms_with_users
+  get_user_with_rooms_with_users,
+  start_game_in_room,
+  flush_rooms,
 }
