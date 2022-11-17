@@ -28,12 +28,12 @@ const start_pylos = async (user, data) => {
     return console.error("Not host trying to start game.")
   }
   
+  await rooms_db.start_game_in_room(room_id)
+  switchboard.add_game(room_id, create_pylos_game())
+  let game = await switchboard.get_game(room_id)
+  JSON.stringify(game, null, 2)
   game_started(room_id)
   room.users.forEach((user, i) => send_turn(user.user_id, i))
-  room.update({ game: "[]" })
-  room.save()
-  switchboard.add_game(room_id, create_pylos_game())
-  let game = switchboard.get_game(room_id)
   distribute_state(game.serial_state, room_id)
 }
 

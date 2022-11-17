@@ -21,7 +21,7 @@ const process_pylos_move = async (user, data) => {
   if (!room) return console.error("Move on non-room")
 
   let current_player = game.serial_state.current_player
-  let sender_turn_num = await room.users.indexOf(user.id)
+  let sender_turn_num = await room.users.map(user => user.user_id).indexOf(user.id)
   let move_player = move.player
 
   let checks =
@@ -34,12 +34,18 @@ const process_pylos_move = async (user, data) => {
     let move_success = game.send_move(move)
     if (move_success) {
       distribute_state(game.serial_state, room_id)
-      wincon_check(room)
+      wincon_check(game.serial_state, room_id)
     } else {
       failed_move(game.serial_state.errors, room_id)
     }
   } else {
-    failed_move("wrong player sent move", room_id)
+    failed_move(`wrong player sent move`, room_id)
+    console.log(
+      `    errors: move_player: ${move_player}
+    sender_turn_num: ${sender_turn_num}
+    current_player: ${current_player}
+`
+    )
   }
 }
 

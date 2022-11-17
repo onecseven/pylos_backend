@@ -2,7 +2,7 @@ const join_room = require("./room/join_room")
 const create_room = require("./room/create_room")
 const user_wants_rematch = require("./room/user_wants_rematch")
 // const leave_room = require("./room/leave_room")
-// const rejoin = require("./room/rejoin")
+const rejoin = require("./room/rejoin")
 
 const start_pylos = require("./games/start_pylos")
 const process_move = require("./games/process_move")
@@ -18,19 +18,19 @@ module.exports = {
   room: {
     join_room, //tested, partial complete
     create_room, //tested, complete
-  //   leave_room, // turned off
+    //   leave_room, // turned off
     user_wants_rematch, //tested, partial complete (needs games tow ork)
-  //   rejoin // changed, should work
+    rejoin, // confirmed working
   },
   user: {
-    name_change,// done
-    get_rooms, // working 
+    name_change, // done
+    get_rooms, // working
     // create_user, //todo
-    remove_user, //todo 
-    login // working
+    remove_user, //todo
+    login, // working
   },
   game: {
-    start_pylos, //seems to be working
-    process_move, //seems to be working
-  }
+    start_pylos, //confirmed working
+    process_move, //confirmed working working
+  },
 }

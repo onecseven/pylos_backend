@@ -1,4 +1,6 @@
-const { create_pylos_game } = require("../functions/games/pylos/clones/pylos/blueprint")
+const {
+  create_pylos_game,
+} = require("../functions/games/pylos/clones/pylos/blueprint")
 const rooms_db = require("./room")
 
 class Switchboard {
@@ -22,21 +24,27 @@ class Switchboard {
   remove(id) {
     this.users.delete(id)
   }
-
-  async get_game(id, options = { rehydrate: false }) {
-    if (this.games.has(id)) return this.games.get(id)
+  /**
+   *
+   * @param {string} room_id
+   * @param {object} options
+   * @returns {GSM}
+   */
+  async get_game(room_id, options = { rehydrate: false }) {
+    if (this.games.has(room_id)) return this.games.get(room_id)
     if (options.rehydrate) {
       await rooms_db
-        .get_room_by_id(id)
-        .then((room) => { 
+        .get_room_by_id(room_id)
+        .then((room) => {
           let new_game = create_pylos_game()
           for (let move of JSON.parse(room.game)) {
             new_game.send_move(move)
           }
-          switchboard.add_game(room_id, new_game)
+          this.add_game(room_id, new_game)
         })
         .catch((e) => console.log("Game in no room?=", e))
-      return this.games.get(id)
+      console.log("Here get game", JSON.stringify(this.games, null, 2))
+      return this.games.get(room_id)
     }
     return null
   }
