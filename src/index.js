@@ -20,7 +20,7 @@ const user_disconnected = require("./functions/user/user_disconnected")
 wss.on("connection", (ws) => {
   // these three could be 1
   ws.id = getUniqueID()
-  let user = { id: ws.id, name: "User#" + ws.id.substring(0, 3) }
+  let user = { id: ws.id, user_id: ws.id, name: "User#" + ws.id.substring(0, 3) }
   register_user(user, ws)
 
   console.log(`user ${ws.id} connected`)
