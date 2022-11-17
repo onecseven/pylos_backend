@@ -10,7 +10,7 @@ let cases = {
   "user wants rematch": room.user_wants_rematch,
   "my rooms": user.get_rooms,
   "login": user.login,
-  // "rejoin": room.rejoin
+  "rejoin": room.rejoin
 }
 
 const router = async (user, data) => {
