@@ -20,7 +20,7 @@ let you_joined = (room, id) =>
   send_data(messages.JOINED_ROOM(room.id, room.users, room.host), id)
 
 let someone_joined = (room, user) =>
-  send_to_room(messages.USER_JOINED(room.id, user), room.id)
+  send_to_room(messages.USER_JOINED(room.room_id, user), room.room_id)
 
 const join_room = async (user, data) => {
   let user_exists = await users_db.get_user_by_id(user.id)
@@ -33,12 +33,11 @@ const join_room = async (user, data) => {
     else if (!room.game) { //working
       await rooms_db.add_user_to_room(roomId, user.id)
       room = await rooms_db.get_room_with_users(roomId)
-      console.log(JSON.stringify(room.users, null, 2))
       you_joined(
         { id: room.room_id, users: room.users, host: room.host },
         user.id
       )
-      someone_joined({ user_id: room.room_id }, user)
+      someone_joined(room, user)
       return
     }
   }
