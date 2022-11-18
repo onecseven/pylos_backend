@@ -79,7 +79,6 @@ const get_rooms_user_is_in = async (user_id) => {
     console.log("Got User: ", user?.user_id)
     if (user) {
       let rooms = await user.getRooms()
-      console.log(JSON.stringify(rooms, null, 2))
       return rooms?.map((room) => room.room_id)
     }
     return user
