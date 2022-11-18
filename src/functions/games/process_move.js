@@ -34,9 +34,10 @@ const process_pylos_move = async (user, data) => {
     let move_success = game.send_move(move)
     if (move_success) {
       distribute_state(game.serial_state, room_id)
-      wincon_check(game.serial_state, room_id)
+      await wincon_check(game.serial_state, room_id)
     } else {
       failed_move(game.serial_state.errors, room_id)
+      console.log(game.serial_state.errors)
     }
   } else {
     failed_move(`wrong player sent move`, room_id)

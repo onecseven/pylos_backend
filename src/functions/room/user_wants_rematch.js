@@ -1,5 +1,5 @@
 const rooms_db = require("../../data/room")
-// const start_pylos = require("../games/start_pylos")
+const start_pylos = require("../games/start_pylos")
 const messages = require("../messages")
 const send_to_room = require("../switchboard/send_to_everyone")
 
@@ -15,9 +15,9 @@ const user_wants_rematch = async (user, data) => {
     room.rematch += 1 
   }
 
-  if (room.rematch === room.max_users) {
+  if (room.rematch >= room.max_users) {
     room.rematch = 0 
-    // start_pylos(room.users[0], data)
+    start_pylos({id: room.host}, data)
   } else {
     rematched(user, id)
   }
