@@ -64,6 +64,20 @@ const start_game_in_room = async (room_id) => {
     return null
   }
 }
+
+const delete_game_in_room = async (room_id) => {
+  await db.sync()
+  try {
+    let room = await get_room_by_id(room_id)
+    await room.update({ game: null })
+    await room.save()
+    return null
+  } catch (e) {
+    console.error(e)
+    return null
+  }
+}
+
 /**
  *
  * @param {string} room_id
@@ -206,10 +220,10 @@ const flush_rooms = async (room_id_array) => {
 
 const delete_old_rooms = async () => {
   let query_string =
-    "SELECT * FROM `rooms` WHERE `rooms`.`updatedAt` < DATETIME('NOW', '-168 hours');"
+    "DELETE * FROM `rooms` WHERE `rooms`.`updatedAt` < DATETIME('NOW', '-168 hours');"
   try {
     let [results, meta] = await db.query(query_string)
-    console.log(JSON.stringify(results, null, 2))
+    console.log("Destroyed from old age: ", JSON.stringify(results, null, 2))
     return null
   } catch (e) {
     console.error(e)
@@ -243,4 +257,5 @@ module.exports = {
   get_user_with_rooms_with_users,
   start_game_in_room,
   flush_rooms,
+  delete_game_in_room,
 }
