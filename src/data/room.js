@@ -220,7 +220,7 @@ const flush_rooms = async (room_id_array) => {
 
 const delete_old_rooms = async () => {
   let query_string =
-    "DELETE * FROM `rooms` WHERE `rooms`.`updatedAt` < DATETIME('NOW', '-168 hours');"
+    "DELETE FROM `rooms` WHERE `rooms`.`updatedAt` < DATETIME('NOW', '-168 hours');"
   try {
     let [results, meta] = await db.query(query_string)
     console.log("Destroyed from old age: ", JSON.stringify(results, null, 2))
